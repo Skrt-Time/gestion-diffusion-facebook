@@ -1,50 +1,46 @@
 <?php
-$fieldSelect = $_POST['fieldSelect'];
 
-if(!empty($fieldSelect)) {
+
+if (isset($_POST['fieldSelect'])) {
+    $fieldSelect = $_POST['fieldSelect'];
     $sqlQuery = "";
-    switch($fieldSelect) {
+    switch ($fieldSelect) {
         case 'date':
-            $startDate = $_POST['startDate'];
-            $endDate = $_POST['endDate'];
-            $sqlQuery = "SELECT * FROM facebook_infos.users WHERE date BETWEEN '$startDate' AND '$endDate'";
+            $startDate = @$_POST['startDate'];
+            $endDate = @$_POST['endDate'];
+            if ($startDate != null && $endDate != null) {
+                $sqlQuery = "SELECT * FROM `facebook_infos.users` WHERE `date` BETWEEN '$startDate' AND '$endDate'";
+            }
             break;
         default:
-            $conditionValue = $_POST['conditionValue'];
-            $sqlQuery = "SELECT * FROM facebook_infos.users WHERE $fieldSelect = '$conditionValue'";
-            break;
-    
-    }
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "facebook_infos";
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    if ($conn->connect_error) {
-        die("La connexion a échoué : " . $conn->connect_error);
-    }
-
-    $result = $conn->query($sqlQuery);
-
-    $numUsers = $result->num_rows;
-    echo "<p>$numUsers utilisateurs trouvés</p>";
-
-    if ($result->num_rows > 0) {
-        echo "<table>";
-        while ($row = $result->fetch_assoc()) {
-            echo "<tr>";
-            foreach ($row as $value) {
-                echo "<td>$value</td>";
+            $conditionValue = @$_POST['conditionValue'];
+            if ($conditionValue != null) {
+                $sqlQuery = "SELECT * FROM `facebook_infos.users` WHERE `$fieldSelect` = '$conditionValue'";
             }
-            echo "</tr>";
-        }
-        echo "</table>";
+            break;
     }
 
-    $conn->close();
-} else {
-    echo "Veuillez sélectionner un champ.";
+    if ($sqlQuery != '') {
+        $serverName = "localhost";
+        $username = "root";
+        $password = "";
+        $dbname = "facebook_infos";
+
+        // Mieux vaut PDO et les requêtes préparées  que mysqli...
+        try {
+            $conn = new mysqli($serverName, $username, $password, $dbname);
+            $result = $conn->query($sqlQuery);
+
+            echo json_encode($result->fetch_all());
+            $conn->close();
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode($e->getMessage());
+        }
+
+        exit;
+    }
 }
-?>
+
+http_response_code(400);
+echo json_encode("Requête incomplete");
