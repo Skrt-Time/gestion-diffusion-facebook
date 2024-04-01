@@ -30,7 +30,7 @@ document.getElementById('fieldSelect').addEventListener('change', function() {
 
     checkInput();
 
-    // Gérer l'affichage de sqlCodeDisplay en fonction de la sélection
+    // Reinitialiser l'affichage de sqlCodeDisplay en fonction de la sélection
     const sqlCodeDisplay = document.getElementById('sqlCodeDisplay');
     sqlCodeDisplay.style.display = 'none';
     });
@@ -46,6 +46,12 @@ document.getElementById('previewSqlBtn').addEventListener('click', function() {
     const sqlCode = document.getElementById('sqlCode');
     sqlCode.textContent = sqlQuery;
     sqlCodeDisplay.style.display = 'block';
+});
+document.getElementById('executeBtn').addEventListener('click', function() {
+    const selectedField = document.getElementById('fieldSelect').value;
+    //console.log("Selected Field:", selectedField);
+
+    sqlQuery = generateSqlQuery(selectedField);
 });
 
 
@@ -230,4 +236,23 @@ function arrayToHtmlTable(array) {
         sqlCodeElement.innerText = sqlQuery; // Réinitialiser le contenu
         btnActions.style.display = 'none';
     });
+
+    $(document).ready(function() {
+        $('#executeBtn').click(function() {
+            //var maVariable = 'Valeur à envoyer à PHP';
+            
+            $.ajax({
+                url: 'traitement.php',
+                method: 'POST',
+                data: { variableJS: sqlQuery },
+                success: function(response) {
+                    $('#resultat').html('Réponse de PHP : ' + response);
+                },
+                error: function() {
+                    $('#resultat').html('Une erreur s\'est produite lors de la communication avec PHP.');
+                }
+            });
+        });
+    });
+    
         

@@ -29,7 +29,6 @@
 
             <div id="conditionInputs"></div>
 
-            <button type="button" id="executeBtn" name="executeBtn" >Effectuer</button>
             <button type="button" id="previewSqlBtn" style="display: none;">Aperçu SQL</button>
         </form>
     </div>
@@ -44,6 +43,9 @@
     </div>
 </div>
     </div>
+    <button id="executeBtn">Exécuter</button>
+    <div id="resultat"></div>    
+
     <script src="jquery-3.6.0.min.js"></script>
     <script src="script.js"></script>
 </body>
