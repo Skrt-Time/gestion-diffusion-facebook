@@ -37,8 +37,14 @@
     <div id="sqlCodeDisplay" class="sql-code-display">
         <h2>Code SQL</h2>
         <pre id="sqlCode"></pre>
+        <button id="btnModifier" style="background-color: blue">Modifier</button>
+        <div id="btnActions" style="display: none;">
+        <button id="btnValider" style="background-color: green;">Valider les changements</button>
+        <button id="btnAnnuler" style="background-color: red;">Annuler les changements</button>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</div>
+    </div>
+    <script src="jquery-3.6.0.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

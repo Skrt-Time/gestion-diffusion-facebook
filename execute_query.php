@@ -30,7 +30,7 @@ if (isset($_POST['fieldSelect'])) {
         try {
             $conn = new mysqli($serverName, $username, $password, $dbname);
             $result = $conn->query($sqlQuery);
-
+            var_dump($result);
             echo json_encode($result->fetch_all());
             $conn->close();
         } catch (\Exception $e) {

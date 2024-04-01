@@ -32,12 +32,8 @@ document.getElementById('fieldSelect').addEventListener('change', function() {
 
     // Gérer l'affichage de sqlCodeDisplay en fonction de la sélection
     const sqlCodeDisplay = document.getElementById('sqlCodeDisplay');
-    if (selectedField !== 'date') {
-        sqlCodeDisplay.style.display = 'none';
-    } else {
-        sqlCodeDisplay.style.display = 'block';
-    }
-});
+    sqlCodeDisplay.style.display = 'none';
+    });
 //Afficher la requete
 document.getElementById('previewSqlBtn').addEventListener('click', function() {
     const selectedField = document.getElementById('fieldSelect').value;
@@ -111,10 +107,10 @@ window.onload = function() {
 
 
 
+sqlQuery = '';
 function generateSqlQuery(selectedField) {
     //console.log("Selected Field:", selectedField);
 
-    let sqlQuery = '';
     const tableName = 'facebook_infos.users';
     const dateField = 'date';
 
@@ -203,3 +199,35 @@ function executeRequest(event) {
 function arrayToHtmlTable(array) {
     // Flemme de faire
 }
+    document.getElementById('btnModifier').addEventListener('click', function() {
+        var sqlCodeElement = document.getElementById('sqlCode');
+        var btnActions = document.getElementById('btnActions');
+        var modifbutton=  document.getElementById('btnModifier');
+        modifbutton.style.display= 'none';
+        
+        sqlCodeElement.contentEditable = true;
+        sqlCodeElement.focus();
+        btnActions.style.display = 'block';
+    });
+    
+    document.getElementById('btnValider').addEventListener('click', function() {
+        var sqlCodeElement = document.getElementById('sqlCode');
+        sqlQuery= sqlCodeElement.innerText;
+        var btnActions = document.getElementById('btnActions');
+        var modifbutton=  document.getElementById('btnModifier');
+        modifbutton.style.display= 'block';
+        
+        sqlCodeElement.contentEditable = false;
+        btnActions.style.display = 'none';
+    });
+    
+    document.getElementById('btnAnnuler').addEventListener('click', function() {
+        var sqlCodeElement = document.getElementById('sqlCode');
+        var btnActions = document.getElementById('btnActions');
+        var modifbutton=  document.getElementById('btnModifier');
+        modifbutton.style.display= 'block';
+        sqlCodeElement.contentEditable = false;
+        sqlCodeElement.innerText = sqlQuery; // Réinitialiser le contenu
+        btnActions.style.display = 'none';
+    });
+        

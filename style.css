@@ -75,4 +75,16 @@ button:hover {
 .sql-code-display pre {
     white-space: pre-wrap;
 }
+#btnActions {
+    margin-top: 10px;
+}
+
+.sql-code-display button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
 
