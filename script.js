@@ -20,7 +20,7 @@ if (previewSqlButton !== null) {
     });
 }
 
-let sqlQuery;
+let sqlQuery, selectedRows = [], rowsData = [];
 document.addEventListener('DOMContentLoaded', checkInput);
 
 
@@ -64,8 +64,8 @@ function changeInputHtml() {
             <label for="endDate">Date de fin:</label>
             <input type="date" id="endDate" name="endDate" oninput="checkInput()">
         `;
-    } else if (selectedField.value) {
-        inputHtml = `<input type="text" name="conditionValue" id="conditionValue" placeholder="Valeur de condition" oninput="checkInput()">`;
+    } else if (selectedField.value != 'all') {
+        inputHtml = `<input type="text" name="conditionValue" class="form-control mb-3" id="conditionValue" placeholder="Valeur de condition" oninput="checkInput()">`;
     }
 
     conditionInputs.innerHTML = inputHtml;
@@ -88,10 +88,12 @@ function generateSqlQuery() {
         console.log("Start Date:", startDate);
         console.log("End Date:", endDate);
         sqlQuery = `SELECT * FROM ${tableName} WHERE ${dateField} BETWEEN '${startDate}' AND '${endDate}'`;
-    } else if (selectedField.value) {
+    } else if (selectedField.value != 'all') {
         let conditionValue = document.getElementById('conditionValue').value;
         console.log("Condition Value:", conditionValue);
         sqlQuery = `SELECT * FROM ${tableName} WHERE ${selectedField.value} = '${conditionValue}'`;
+    } else {
+        sqlQuery = `SELECT * FROM ${tableName}`;
     }
 
     console.log("Generated SQL Query:", sqlQuery);
@@ -147,12 +149,40 @@ function executeRequest(event) {
     fetch(url, options)
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            rowsData = data;
+            const resultDiv = document.getElementById('result'); // Plus besoin de verifier si c'est different de `null` ou pas
+            if (data.length == 0) {
+                resultDiv.innerText = "Aucune correspondance retrouvée";
+                return;
+            }
+
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(arrayToHtmlTable(data));
+            resultDiv.innerHTML += '<button class="btn btn-dark rounded w-25" onclick="sendSelectedRows();">Soumettre la selection</button>';
         })
         .catch(error => {
-            console.error('Error submitting form:', error);
+            console.error('Error submitting or processing form:', error);
         })
         .finally();
+}
+
+function sendSelectedRows() {
+    selectedRows = selectedRows.filter(e => e !== null);
+
+    const url = '/execute_query.php';
+    const options = {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+            rowsData.filter((r, index) => selectedRows.includes(index))
+        ),
+    };
+    fetch(url, options)
+        .then(response => response.json())
+        .then(data => { window.open(data.filePath, '_blank') })
+        .catch(error => {
+            console.error('Error submitting data:', error);
+        });
 }
 
 /**
@@ -160,5 +190,47 @@ function executeRequest(event) {
  * @param {Array} array 
  */
 function arrayToHtmlTable(array) {
-    // Flemme de faire
+    let table = document.createElement('table');
+    table.className = 'table table-striped table-sm';
+    if (array.length == 0) {
+        return table;
+    }
+
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
+
+    const keys = Object.keys(array[0]);
+    let th = document.createElement('tr');
+    th.innerHTML = '<th></th>'
+    keys.forEach((k) => {
+        th.innerHTML += `<th>${k}</th>`;
+    })
+    thead.appendChild(th);
+
+    array.forEach((row, index) => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `<td class="p-3"><input type="checkbox" checked onclick="updateSelectedRows(this);" class="form-checkbox" name="checked" value="${index}"></td>`;
+        keys.forEach((k) => {
+            tr.innerHTML += `<td>${row[k]}</td>`
+        })
+        tbody.appendChild(tr);
+    });
+    selectedRows = Array.from({ length: array.length }, (v, k) => k);
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    return table;
+}
+
+/**
+ * 
+ * @param {HTMLInputElement} elt 
+ */
+function updateSelectedRows(elt) {
+    if (elt.checked) {
+        selectedRows.push(parseInt(elt.value));
+    } else {
+        selectedRows[selectedRows.indexOf(parseInt(elt.value))] = null;
+    }
 }
