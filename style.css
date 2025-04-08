@@ -1,55 +1,24 @@
-body, html {
+body,
+html {
     height: 100%;
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #ffcccc;
-}
-
-.container {
-    padding: 20px;
-    background-color: #ff9999;
-    width: 300px;
-    margin: auto;
-    margin-top: 50px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-select, input, button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    box-sizing: border-box; /* Added for CSS box model consistency */
-}
-
-button {
-    background-color: #e60000;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #cc0000;
-}
-.button {
-    transition: background-color 0.3s ease;
 }
 
 /* Ajoutez ceci si ce n'est pas déjà fait, ajustez les couleurs selon vos préférences */
-#executeBtn, #previewSqlBtn {
+#executeBtn,
+#previewSqlBtn {
     transition: background-color 0.3s ease;
 }
 
-#executeBtn.inactive, #previewSqlBtn.inactive {
+#executeBtn.inactive,
+#previewSqlBtn.inactive {
     background-color: #ccc;
     color: #666;
     cursor: not-allowed;
 }
 
-#executeBtn.active, #previewSqlBtn.active {
+#executeBtn.active,
+#previewSqlBtn.active {
     background-color: red;
     color: white;
     cursor: pointer;
@@ -59,13 +28,10 @@ button:hover {
 
 /* Ajoutez ces styles pour la bande blanche qui affiche le code SQL */
 .sql-code-display {
-    background-color: white;
-    padding: 20px;
-    margin-top: 20px;
-    width: 100%;
-    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
     border: 1px solid #ccc;
-    display: none; /* Initialement caché */
+    display: none;
+    /* Initialement caché */
 }
 
 .sql-code-display h2 {
@@ -75,16 +41,3 @@ button:hover {
 .sql-code-display pre {
     white-space: pre-wrap;
 }
-#btnActions {
-    margin-top: 10px;
-}
-
-.sql-code-display button {
-    margin-right: 10px;
-    padding: 5px 10px;
-    border: none;
-    color: white;
-    cursor: pointer;
-}
-
-
