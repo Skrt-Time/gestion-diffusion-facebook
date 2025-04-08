@@ -5,135 +5,98 @@ if (executeButton !== null) {
 }
 
 const conditionInputs = document.getElementById('conditionInputs');
-let sqlQuery;
-document.addEventListener('DOMContentLoaded', checkInput);
+const selectedField = document.getElementById('fieldSelect');
+if (selectedField !== null) {
+    selectedField.addEventListener('change', changeInputHtml);
+}
 
-
-document.getElementById('fieldSelect').addEventListener('change', function() {
-    const selectedField = this.value;
-    const conditionInputs = document.getElementById('conditionInputs');
-    conditionInputs.innerHTML = '';
-
-    let inputHtml = '';
-    if (selectedField === 'date') {
-        inputHtml = `
-            <label for="startDate">Date de début:</label>
-            <input type="date" id="startDate" name="startDate" oninput="checkInput()">
-            <label for="endDate">Date de fin:</label>
-            <input type="date" id="endDate" name="endDate" oninput="checkInput()">
-        `;
-    } else if (selectedField != 'all') {
-        inputHtml = `<input type="text" name="conditionValue" id="conditionValue" placeholder="Valeur de condition" oninput="checkInput()">`;
-    }
-
-    conditionInputs.innerHTML = inputHtml;
-
-    checkInput();
-
-    // Reinitialiser l'affichage de sqlCodeDisplay en fonction de la sélection
-    const sqlCodeDisplay = document.getElementById('sqlCodeDisplay');
-    sqlCodeDisplay.style.display = 'none';
+const previewSqlButton = document.getElementById('previewSqlBtn');
+if (previewSqlButton !== null) {
+    previewSqlButton.addEventListener('click', () => {
+        const sqlCodeDisplay = document.getElementById('sqlCodeDisplay');
+        const sqlCode = document.getElementById('sqlCode');
+        if (sqlCode !== null) { sqlCode.textContent = generateSqlQuery(); }
+        if (sqlCodeDisplay !== null) { sqlCodeDisplay.style.display = 'block'; }
     });
-//Afficher la requete
-document.getElementById('previewSqlBtn').addEventListener('click', function() {
-    const selectedField = document.getElementById('fieldSelect').value;
-    console.log("Selected Field:", selectedField);
+}
 
-    let sqlQuery = generateSqlQuery(selectedField);
-    console.log("Generated SQL Query:", sqlQuery);
-
-    const sqlCodeDisplay = document.getElementById('sqlCodeDisplay');
-    const sqlCode = document.getElementById('sqlCode');
-    sqlCode.textContent = sqlQuery;
-    sqlCodeDisplay.style.display = 'block';
-});
-document.getElementById('executeBtn').addEventListener('click', function() {
-    const selectedField = document.getElementById('fieldSelect').value;
-    //console.log("Selected Field:", selectedField);
-
-    sqlQuery = generateSqlQuery(selectedField);
-});
-
+let sqlQuery, selectedRows = [], rowsData = [];
+document.addEventListener('DOMContentLoaded', checkInput);
 
 
 
 function checkInput() {
     const inputs = document.querySelectorAll('#conditionInputs input');
     const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
-    const selectedField = document.getElementById('fieldSelect').value;
-    const executeBtn = document.getElementById('executeBtn');
-    const previewBtn = document.getElementById('previewSqlBtn');
 
-    if (selectedField && allFilled) {
-        executeBtn.removeAttribute('disabled');
-        executeBtn.classList.remove('inactive');
-        previewBtn.style.opacity = 1;
-        previewBtn.style.display = 'block';
-        previewBtn.classList.remove('inactive');
-    } else if (selectedField== 'all'){
-        executeBtn.removeAttribute('disabled');
-        executeBtn.classList.remove('inactive');
-        previewBtn.style.opacity = 1;
-        previewBtn.style.display = 'block';
-        previewBtn.classList.remove('inactive');
-    }else {
-        executeBtn.setAttribute('disabled', 'disabled');
-        executeBtn.classList.add('inactive');
-        previewBtn.style.opacity = 0;
+    if (previewSqlButton === null) {
+        return;
+    }
+
+    if (selectedField !== null && selectedField.value != null && allFilled) {
+        toggleExecuteButton();
+        previewSqlButton.style.opacity = 1;
+        previewSqlButton.style.display = 'block';
+        previewSqlButton.classList.remove('inactive');
+
+    } else {
+        toggleExecuteButton(false);
+        previewSqlButton.style.opacity = 0;
         setTimeout(() => {
-            previewBtn.style.display = 'none';
+            previewSqlButton.style.display = 'none';
         }, 300);
-        previewBtn.classList.add('inactive');
+        previewSqlButton.classList.add('inactive');
+
     }
 }
 
+function changeInputHtml() {
+    if (conditionInputs === null) {
+        return;
+    }
 
-checkInput();
-window.onload = function() {
-    const selectedField = document.getElementById('fieldSelect').value;
-    const executeBtn = document.getElementById('executeBtn');
-    const previewBtn = document.getElementById('previewSqlBtn');
-    // Réinitialiser les valeurs des inputs à leur état par défaut
-    
-    // Réinitialiser la sélection du dropdown menu à sa valeur par défaut
-    document.getElementById('fieldSelect').selectedIndex = 0;
 
-    // Réinitialiser l'état des boutons à leur état par défaut
-    executeBtn.setAttribute('disabled', 'disabled');
-    executeBtn.classList.add('inactive');
-    setTimeout(() => {
-    previewBtn.style.display = 'none';
-    }, 300);
-    previewBtn.style.display = 'none';
-    previewBtn.classList.add('inactive');
-    previewBtn.style.opacity = 0;
-    //document.getElementById('bouton1').disabled = false;
-    //document.getElementById('bouton2').disabled = true;
+    let inputHtml = '';
+    if (selectedField.value === 'date') {
+        inputHtml = `
+            <label for="startDate">Date de début:</label>
+            <input type="date" id="startDate" name="startDate" oninput="checkInput()">
+            <label for="endDate">Date de fin:</label>
+            <input type="date" id="endDate" name="endDate" oninput="checkInput()">
+        `;
+    } else if (selectedField.value != 'all') {
+        inputHtml = `<input type="text" name="conditionValue" class="form-control mb-3" id="conditionValue" placeholder="Valeur de condition" oninput="checkInput()">`;
+    }
+
+    conditionInputs.innerHTML = inputHtml;
+    checkInput();
+     // Reinitialiser l'affichage de sqlCodeDisplay en fonction de la sélection
+     const sqlCodeDisplay = document.getElementById('sqlCodeDisplay');
+     sqlCodeDisplay.style.display = 'none';
+
 }
 
-
-
-sqlQuery = '';
-function generateSqlQuery(selectedField) {
-    //console.log("Selected Field:", selectedField);
+function generateSqlQuery() {
+    if (selectedField === null) {
+        return;
+    }
+    console.log("Selected Field:", selectedField.value);
 
     const tableName = 'facebook_infos.users';
     const dateField = 'date';
 
-    
-    if (selectedField === 'date') {
+    if (selectedField.value === 'date') {
         let startDate = document.getElementById('startDate').value;
         let endDate = document.getElementById('endDate').value;
-        //console.log("Start Date:", startDate);
-        //console.log("End Date:", endDate);
+        console.log("Start Date:", startDate);
+        console.log("End Date:", endDate);
         sqlQuery = `SELECT * FROM ${tableName} WHERE ${dateField} BETWEEN '${startDate}' AND '${endDate}'`;
-    }else if (selectedField === 'all') {
-        sqlQuery = `SELECT * FROM ${tableName}`; // Sélectionner tous les utilisateurs
-    } else { 
+    } else if (selectedField.value == 'all') {
+        sqlQuery = `SELECT * FROM ${tableName}`;
+    } else {
         let conditionValue = document.getElementById('conditionValue').value;
         console.log("Condition Value:", conditionValue);
-        console.log("champ selectionné", selectedField);
-        sqlQuery = `SELECT * FROM ${tableName} WHERE ${selectedField} = '${conditionValue}'`;
+        sqlQuery = `SELECT * FROM ${tableName} WHERE ${selectedField.value} = '${conditionValue}'`;
     }
 
     console.log("Generated SQL Query:", sqlQuery);
@@ -165,12 +128,11 @@ function toggleExecuteButton(enable = true) {
  * @returns 
  */
 function executeRequest(event) {
-    const selectedField = document.getElementById('fieldSelect').value;
     event.preventDefault();
     event.stopPropagation();
 
     if (sqlQuery == null || sqlQuery == '') {
-        sqlQuery= generateSqlQuery(selectedField);
+        generateSqlQuery();
         if (sqlQuery == null || sqlQuery == '') {
             alert("Aucune requête n'a été construite.")
             return;
@@ -182,7 +144,7 @@ function executeRequest(event) {
     }
 
     const formData = new FormData(form);
-    const url = '/dropdown_sql/execute_query.php';
+    const url = 'execute_query.php';
     const options = {
         method: 'POST',
         body: formData,
@@ -190,12 +152,40 @@ function executeRequest(event) {
     fetch(url, options)
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            rowsData = data;
+            const resultDiv = document.getElementById('result'); // Plus besoin de verifier si c'est different de `null` ou pas
+            if (data.length == 0) {
+                resultDiv.innerText = "Aucune correspondance retrouvée";
+                return;
+            }
+
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(arrayToHtmlTable(data));
+            resultDiv.innerHTML += '<button class="btn btn-dark rounded w-25" onclick="sendSelectedRows();">Soumettre la selection</button>';
         })
         .catch(error => {
-            console.error('Error submitting form:', error);
+            console.error('Error submitting or processing form:', error);
         })
         .finally();
+}
+
+function sendSelectedRows() {
+    selectedRows = selectedRows.filter(e => e !== null);
+
+    const url = '/execute_query.php';
+    const options = {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+            rowsData.filter((r, index) => selectedRows.includes(index))
+        ),
+    };
+    fetch(url, options)
+        .then(response => response.json())
+        .then(data => { window.open(data.filePath, '_blank') })
+        .catch(error => {
+            console.error('Error submitting data:', error);
+        });
 }
 
 /**
@@ -203,56 +193,66 @@ function executeRequest(event) {
  * @param {Array} array 
  */
 function arrayToHtmlTable(array) {
-    // Flemme de faire
-}
-    document.getElementById('btnModifier').addEventListener('click', function() {
-        var sqlCodeElement = document.getElementById('sqlCode');
-        var btnActions = document.getElementById('btnActions');
-        var modifbutton=  document.getElementById('btnModifier');
-        modifbutton.style.display= 'none';
-        
-        sqlCodeElement.contentEditable = true;
-        sqlCodeElement.focus();
-        btnActions.style.display = 'block';
-    });
-    
-    document.getElementById('btnValider').addEventListener('click', function() {
-        var sqlCodeElement = document.getElementById('sqlCode');
-        sqlQuery= sqlCodeElement.innerText;
-        var btnActions = document.getElementById('btnActions');
-        var modifbutton=  document.getElementById('btnModifier');
-        modifbutton.style.display= 'block';
-        
-        sqlCodeElement.contentEditable = false;
-        btnActions.style.display = 'none';
-    });
-    
-    document.getElementById('btnAnnuler').addEventListener('click', function() {
-        var sqlCodeElement = document.getElementById('sqlCode');
-        var btnActions = document.getElementById('btnActions');
-        var modifbutton=  document.getElementById('btnModifier');
-        modifbutton.style.display= 'block';
-        sqlCodeElement.contentEditable = false;
-        sqlCodeElement.innerText = sqlQuery; // Réinitialiser le contenu
-        btnActions.style.display = 'none';
-    });
+    let table = document.createElement('table');
+    table.className = 'table table-striped table-sm';
+    if (array.length == 0) {
+        return table;
+    }
 
-    $(document).ready(function() {
-        $('#executeBtn').click(function() {
-            //var maVariable = 'Valeur à envoyer à PHP';
-            
-            $.ajax({
-                url: 'traitement.php',
-                method: 'POST',
-                data: { variableJS: sqlQuery },
-                success: function(response) {
-                    $('#resultat').html('Réponse de PHP : ' + response);
-                },
-                error: function() {
-                    $('#resultat').html('Une erreur s\'est produite lors de la communication avec PHP.');
-                }
-            });
-        });
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
+
+    const keys = Object.keys(array[0]);
+    let th = document.createElement('tr');
+    th.innerHTML = '<th></th>'
+    keys.forEach((k) => {
+        th.innerHTML += `<th>${k}</th>`;
+    })
+    thead.appendChild(th);
+
+    array.forEach((row, index) => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `<td class="p-3"><input type="checkbox" checked onclick="updateSelectedRows(this);" class="form-checkbox" name="checked" value="${index}"></td>`;
+        keys.forEach((k) => {
+            tr.innerHTML += `<td>${row[k]}</td>`
+        })
+        tbody.appendChild(tr);
     });
+    selectedRows = Array.from({ length: array.length }, (v, k) => k);
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    return table;
+}
+window.onload = function() {
+    const selectedField = document.getElementById('fieldSelect').value;
+    const executeBtn = document.getElementById('executeBtn');
+    const previewBtn = document.getElementById('previewSqlBtn');
+    // Réinitialiser les valeurs des inputs à leur état par défaut
     
-        
+    // Réinitialiser la sélection du dropdown menu à sa valeur par défaut
+    document.getElementById('fieldSelect').selectedIndex = 0;
+
+    // Réinitialiser l'état des boutons à leur état par défaut
+    executeBtn.setAttribute('disabled', 'disabled');
+    executeBtn.classList.add('inactive');
+    setTimeout(() => {
+    previewBtn.style.display = 'none';
+    }, 300);
+    previewBtn.style.display = 'none';
+    previewBtn.classList.add('inactive');
+    previewBtn.style.opacity = 0;
+}
+
+/**
+ * 
+ * @param {HTMLInputElement} elt 
+ */
+function updateSelectedRows(elt) {
+    if (elt.checked) {
+        selectedRows.push(parseInt(elt.value));
+    } else {
+        selectedRows[selectedRows.indexOf(parseInt(elt.value))] = null;
+    }
+}
